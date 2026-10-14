@@ -45,6 +45,7 @@ app.add_middleware(
 
 # Health Check Endpoint
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
+@app.get("/api/health", response_model=HealthResponse, tags=["Health"])
 def health_check(db: sqlite3.Connection = Depends(get_db)):
     """
     Checks that the server is alive and that the SQLite database is reachable.
