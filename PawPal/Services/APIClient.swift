@@ -100,7 +100,7 @@ class APIClient {
         request.httpBody = bodyData
         
         // Log outgoing request to the Live Activity & Payload Inspector
-        await LiveInspectorViewModel.shared.log(
+        LiveInspectorViewModel.shared.log(
             title: "\(method) \(endpoint)",
             category: .apiRequest,
             method: method,
@@ -115,7 +115,7 @@ class APIClient {
             (data, response) = try await session.data(for: request)
         } catch {
             // Log failed connection
-            await LiveInspectorViewModel.shared.log(
+            LiveInspectorViewModel.shared.log(
                 title: "Failed: \(method) \(endpoint)",
                 category: .apiResponse,
                 method: method,
@@ -132,7 +132,7 @@ class APIClient {
         
         // Log response received
         let isSuccess = (200...299).contains(httpResponse.statusCode)
-        await LiveInspectorViewModel.shared.log(
+        LiveInspectorViewModel.shared.log(
             title: "[\(httpResponse.statusCode)] \(method) \(endpoint)",
             category: .apiResponse,
             method: method,

@@ -21,7 +21,7 @@ def get_db_connection() -> sqlite3.Connection:
     # Ensure data folder exists before connecting
     os.makedirs(DATA_DIR, exist_ok=True)
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     # Enable foreign keys constraint enforcement in SQLite
     conn.execute("PRAGMA foreign_keys = ON;")
     # Return rows as dictionary-like objects (access columns by name)

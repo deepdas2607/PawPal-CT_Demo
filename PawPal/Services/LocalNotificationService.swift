@@ -18,14 +18,14 @@ class LocalNotificationService {
     func requestAuthorization() async -> Bool {
         do {
             let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
-            await LiveInspectorViewModel.shared.log(
+            LiveInspectorViewModel.shared.log(
                 title: "Notification Permission Requested",
                 category: .notification,
                 payload: "Granted: \(granted)"
             )
             return granted
         } catch {
-            await LiveInspectorViewModel.shared.log(
+            LiveInspectorViewModel.shared.log(
                 title: "Notification Permission Error",
                 category: .notification,
                 payload: error.localizedDescription,
@@ -70,7 +70,7 @@ class LocalNotificationService {
         
         do {
             try await center.add(request)
-            await LiveInspectorViewModel.shared.log(
+            LiveInspectorViewModel.shared.log(
                 title: "Local Notification Scheduled",
                 category: .notification,
                 payload: [
@@ -80,7 +80,7 @@ class LocalNotificationService {
                 ]
             )
         } catch {
-            await LiveInspectorViewModel.shared.log(
+            LiveInspectorViewModel.shared.log(
                 title: "Notification Schedule Failed",
                 category: .notification,
                 payload: error.localizedDescription,
@@ -93,13 +93,11 @@ class LocalNotificationService {
     func cancelNotification(reminderId: String) {
         let identifier = "reminder-\(reminderId)"
         center.removePendingNotificationRequests(withIdentifiers: [identifier])
-        Task {
-            await LiveInspectorViewModel.shared.log(
-                title: "Notification Cancelled",
-                category: .notification,
-                payload: "Cancelled notification ID: \(identifier)"
-            )
-        }
+        LiveInspectorViewModel.shared.log(
+            title: "Notification Cancelled",
+            category: .notification,
+            payload: "Cancelled notification ID: \(identifier)"
+        )
     }
 }
 

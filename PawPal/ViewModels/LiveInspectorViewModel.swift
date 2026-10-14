@@ -11,12 +11,11 @@ import SwiftUI
 import Combine
 
 /// Shared ViewModel providing real-time activity and payload inspection.
-@MainActor
 class LiveInspectorViewModel: ObservableObject {
     /// Global shared singleton instance for logging throughout the app
     static let shared = LiveInspectorViewModel()
     
-    /// Array of captured inspector log items
+    /// Array of captured inspector log items (published on MainActor)
     @Published var logs: [LiveInspectorLog] = []
     
     /// Active category filter
@@ -36,7 +35,7 @@ class LiveInspectorViewModel: ObservableObject {
         return logs.filter { $0.category == selectedCategory }
     }
     
-    /// Records a new inspector log entry
+    /// Records a new inspector log entry safely from any thread or async context
     func log(
         title: String,
         category: InspectorLogCategory,
@@ -46,23 +45,7 @@ class LiveInspectorViewModel: ObservableObject {
         payload: Any? = nil,
         isSuccess: Bool = true
     ) {
-        var formattedJSON = "No payload"
-        
-        if let payload = payload {
-            if let stringPayload = payload as? String {
-                formattedJSON = stringPayload
-            } else if let dataPayload = payload as? Data,
-                      let jsonObject = try? JSONSerialization.jsonObject(with: dataPayload, options: []),
-                      let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted]),
-                      let prettyString = String(data: prettyData, encoding: .utf8) {
-                formattedJSON = prettyString
-            } else if let jsonObject = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted]),
-                      let prettyString = String(data: jsonObject, encoding: .utf8) {
-                formattedJSON = prettyString
-            } else {
-                formattedJSON = String(describing: payload)
-            }
-        }
+        let formattedJSON = formatPayload(payload)
         
         let entry = LiveInspectorLog(
             title: title,
@@ -74,18 +57,55 @@ class LiveInspectorViewModel: ObservableObject {
             isSuccess: isSuccess
         )
         
-        // Insert at beginning so newest appears first
-        logs.insert(entry, at: 0)
-        
-        // Trim if exceeds limit
-        if logs.count > maxLogCount {
-            logs.removeLast(logs.count - maxLogCount)
+        Task { @MainActor in
+            self.logs.insert(entry, at: 0)
+            if self.logs.count > self.maxLogCount {
+                self.logs.removeLast(self.logs.count - self.maxLogCount)
+            }
         }
     }
     
+    /// Safely formats any payload into a pretty-printed JSON string or readable text
+    private func formatPayload(_ payload: Any?) -> String {
+        guard let payload = payload else {
+            return "No payload"
+        }
+        
+        // 1. Already a String
+        if let stringPayload = payload as? String {
+            return stringPayload
+        }
+        
+        // 2. Raw Data (e.g. HTTP request / response bodies)
+        if let dataPayload = payload as? Data {
+            // Check if it's valid JSON bytes
+            if let jsonObject = try? JSONSerialization.jsonObject(with: dataPayload, options: []),
+               JSONSerialization.isValidJSONObject(jsonObject),
+               let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted]),
+               let prettyString = String(data: prettyData, encoding: .utf8) {
+                return prettyString
+            }
+            // Check if it's UTF-8 plain text (e.g. error message from backend)
+            if let plainString = String(data: dataPayload, encoding: .utf8), !plainString.isEmpty {
+                return plainString
+            }
+            return "\(dataPayload.count) bytes binary data"
+        }
+        
+        // 3. Dictionary or Array JSON objects
+        if JSONSerialization.isValidJSONObject(payload),
+           let prettyData = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted]),
+           let prettyString = String(data: prettyData, encoding: .utf8) {
+            return prettyString
+        }
+        
+        // 4. Fallback description
+        return String(describing: payload)
+    }
+    
     /// Clears all captured inspection logs
+    @MainActor
     func clearLogs() {
         logs.removeAll()
     }
 }
-

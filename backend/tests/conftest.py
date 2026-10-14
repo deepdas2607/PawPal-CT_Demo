@@ -24,7 +24,7 @@ def test_db():
     temp_dir = tempfile.mkdtemp()
     temp_db_path = os.path.join(temp_dir, "test_pawpal.db")
 
-    conn = sqlite3.connect(temp_db_path)
+    conn = sqlite3.connect(temp_db_path, check_same_thread=False)
     conn.execute("PRAGMA foreign_keys = ON;")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -106,7 +106,9 @@ def test_db():
     conn.commit()
 
     def override_get_db():
-        test_conn = sqlite3.connect(temp_db_path)
+        test_conn = sqlite3.connect(
+            temp_db_path, check_same_thread=False
+        )
         test_conn.execute("PRAGMA foreign_keys = ON;")
         test_conn.row_factory = sqlite3.Row
         try:
