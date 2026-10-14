@@ -1,18 +1,21 @@
 """
 Pytest Fixtures for PawPal Backend Tests.
-Provides a test client configured with an isolated temporary SQLite test database.
+Provides a test client configured with an isolated temporary SQLite test
+database.
 """
 
 import os
-import tempfile
 import sqlite3
+import tempfile
+
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.database import get_db
+from app.main import app
 
-@pytest.fixture(scope="function")
+
+@pytest.fixture(autouse=True)
 def test_db():
     """
     Creates an isolated temporary SQLite database for each test function.
@@ -20,7 +23,7 @@ def test_db():
     """
     temp_dir = tempfile.mkdtemp()
     temp_db_path = os.path.join(temp_dir, "test_pawpal.db")
-    
+
     conn = sqlite3.connect(temp_db_path)
     conn.execute("PRAGMA foreign_keys = ON;")
     conn.row_factory = sqlite3.Row
@@ -91,7 +94,13 @@ def test_db():
     # Seed tips
     cursor.execute("""
     INSERT INTO pet_tips (id, title, content, category, icon_name)
-    VALUES ('tip-hydration', 'Hydration', 'Always keep fresh water available.', 'Nutrition', 'drop.fill');
+    VALUES (
+        'tip-hydration',
+        'Hydration',
+        'Always keep fresh water available.',
+        'Nutrition',
+        'drop.fill'
+    );
     """)
 
     conn.commit()
@@ -116,8 +125,8 @@ def test_db():
     if os.path.exists(temp_dir):
         os.rmdir(temp_dir)
 
-@pytest.fixture(scope="function")
-def client(test_db):
+
+@pytest.fixture
+def client():
     """Returns a FastAPI TestClient configured to use the test database."""
     return TestClient(app)
-

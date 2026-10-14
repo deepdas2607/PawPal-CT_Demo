@@ -143,3 +143,4 @@ Per project specifications, all future CleverTap learning exercises, event schem
 ```
 
 The main PawPal application contains **zero CleverTap SDK imports, packages, or tracking calls**. The app functions 100% independently.
+

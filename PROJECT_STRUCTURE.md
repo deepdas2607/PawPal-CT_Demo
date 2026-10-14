@@ -81,3 +81,4 @@ This document explicitly classifies every source file in PawPal into its archite
 | **GET** | `/api/pets/{pet_id}/saved-tips` | Fetch saved tip IDs for pet | None | `200 OK` / `404` |
 | **PUT** | `/api/pets/{pet_id}/saved-tips/{tip_id}` | Save tip to favorites | None | `200 OK` / `404` |
 | **DELETE**| `/api/pets/{pet_id}/saved-tips/{tip_id}` | Remove tip from favorites | None | `200 OK` / `404` |
+

@@ -35,3 +35,4 @@ pytest -v
   - `care_reminders`: Stores upcoming and completed reminders.
   - `pet_tips`: Seeded wellness tips.
   - `saved_tips`: Join table for pet favorite tips.
+
