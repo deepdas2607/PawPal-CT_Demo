@@ -65,6 +65,9 @@ class ActivityLogViewModel: ObservableObject {
             // Prepend new activity
             activities.insert(newActivity, at: 0)
             
+            // Dispatch to CleverTap via bridge
+            PawPalCleverTapBridge.onActivityLogged(activity: newActivity, petName: "Pet")
+            
             // Log local event to inspector for debugging
             LiveInspectorViewModel.shared.log(
                 title: "Care Activity Logged: \(selectedType.rawValue)",

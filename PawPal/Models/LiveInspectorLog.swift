@@ -11,6 +11,7 @@ import Foundation
 /// Defines the category of an inspector event.
 enum InspectorLogCategory: String, CaseIterable, Identifiable {
     case all = "All"
+    case cleverTap = "CleverTap"
     case apiRequest = "Request"
     case apiResponse = "Response"
     case localEvent = "Event"
@@ -21,6 +22,7 @@ enum InspectorLogCategory: String, CaseIterable, Identifiable {
     var iconName: String {
         switch self {
         case .all: return "line.3.horizontal.decrease.circle"
+        case .cleverTap: return "paperplane.circle.fill"
         case .apiRequest: return "arrow.up.circle.fill"
         case .apiResponse: return "arrow.down.circle.fill"
         case .localEvent: return "bolt.circle.fill"

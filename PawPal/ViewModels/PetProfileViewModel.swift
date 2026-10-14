@@ -72,6 +72,10 @@ class PetProfileViewModel: ObservableObject {
             self.isLoading = false
             self.isEditing = false
             self.showSuccessAlert = true
+            
+            // Sync updated profile attributes to CleverTap
+            PawPalCleverTapBridge.onPetProfileUpdated(pet: updated)
+            
             return true
         } catch {
             self.isLoading = false

@@ -78,6 +78,9 @@ class TipsViewModel: ObservableObject {
                     payload: ["tipId": tip.id]
                 )
             }
+            
+            // Track via CleverTap Bridge
+            PawPalCleverTapBridge.onTipFavoriteToggled(tip: tip, isSaved: newSavedState, petId: petId)
         } catch {
             // Revert on error
             if let index = tips.firstIndex(where: { $0.id == tip.id }) {

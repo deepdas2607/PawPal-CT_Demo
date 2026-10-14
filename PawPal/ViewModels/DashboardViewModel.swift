@@ -86,6 +86,8 @@ class DashboardViewModel: ObservableObject {
             // Cancel notification if completed
             if updated.isCompleted {
                 LocalNotificationService.shared.cancelNotification(reminderId: reminder.id)
+                // Track completed reminder via CleverTap Bridge
+                PawPalCleverTapBridge.onReminderCompleted(reminder: updated, petName: activePet?.name)
             }
             
             // Update local list

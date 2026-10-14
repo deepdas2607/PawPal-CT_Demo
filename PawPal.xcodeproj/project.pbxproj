@@ -6,13 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4001E0CDAECB0D3A4050778D /* Pods_PawPal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B58400F2419CD538A2205A4 /* Pods_PawPal.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		2B259F8DC29ABC9146FC08C2 /* Pods-PawPal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PawPal.debug.xcconfig"; path = "Target Support Files/Pods-PawPal/Pods-PawPal.debug.xcconfig"; sourceTree = "<group>"; };
+		4B58400F2419CD538A2205A4 /* Pods_PawPal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PawPal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E5F80D5307F4BBD003A2451 /* PawPal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PawPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		90843932F54CF04DB0096EFF /* Pods-PawPal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PawPal.release.xcconfig"; path = "Target Support Files/Pods-PawPal/Pods-PawPal.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8E5F80D7307F4BBD003A2451 /* PawPal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = PawPal;
 			sourceTree = "<group>";
 		};
@@ -23,17 +32,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4001E0CDAECB0D3A4050778D /* Pods_PawPal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C9610FE80453C51D49BA508 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2B259F8DC29ABC9146FC08C2 /* Pods-PawPal.debug.xcconfig */,
+				90843932F54CF04DB0096EFF /* Pods-PawPal.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		8E5F80CC307F4BBD003A2451 = {
 			isa = PBXGroup;
 			children = (
 				8E5F80D7307F4BBD003A2451 /* PawPal */,
 				8E5F80D6307F4BBD003A2451 /* Products */,
+				3C9610FE80453C51D49BA508 /* Pods */,
+				CC67CAFC36E0CE473D44B672 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -45,6 +67,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		CC67CAFC36E0CE473D44B672 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4B58400F2419CD538A2205A4 /* Pods_PawPal.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -52,9 +82,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8E5F80E0307F4BC0003A2451 /* Build configuration list for PBXNativeTarget "PawPal" */;
 			buildPhases = (
+				DAD719A9EE7F6814D6921B24 /* [CP] Check Pods Manifest.lock */,
 				8E5F80D1307F4BBD003A2451 /* Sources */,
 				8E5F80D2307F4BBD003A2451 /* Frameworks */,
 				8E5F80D3307F4BBD003A2451 /* Resources */,
+				C2F7A5E48F6FE0D0607AECDC /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -64,8 +96,6 @@
 				8E5F80D7307F4BBD003A2451 /* PawPal */,
 			);
 			name = PawPal;
-			packageProductDependencies = (
-			);
 			productName = PawPal;
 			productReference = 8E5F80D5307F4BBD003A2451 /* PawPal.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +143,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C2F7A5E48F6FE0D0607AECDC /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PawPal/Pods-PawPal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PawPal/Pods-PawPal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PawPal/Pods-PawPal-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DAD719A9EE7F6814D6921B24 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PawPal-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8E5F80D1307F4BBD003A2451 /* Sources */ = {
@@ -162,7 +234,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -225,7 +297,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -246,6 +318,7 @@
 		};
 		8E5F80E1307F4BC0003A2451 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2B259F8DC29ABC9146FC08C2 /* Pods-PawPal.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -253,12 +326,15 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CleverTapAccountID = "587-878-Z97Z";
+				INFOPLIST_KEY_CleverTapRegion = eu1;
+				INFOPLIST_KEY_CleverTapToken = "bab-ab5";
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -279,6 +355,7 @@
 		};
 		8E5F80E2307F4BC0003A2451 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 90843932F54CF04DB0096EFF /* Pods-PawPal.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -286,12 +363,15 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CleverTapAccountID = "587-878-Z97Z";
+				INFOPLIST_KEY_CleverTapRegion = eu1;
+				INFOPLIST_KEY_CleverTapToken = "bab-ab5";
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
+				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
-				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

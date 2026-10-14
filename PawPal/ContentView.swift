@@ -47,6 +47,7 @@ struct ContentView: View {
             let pets = try await PetService.shared.fetchPets()
             if let firstPet = pets.first {
                 self.activePet = firstPet
+                CleverTapIdentity.restoreSession(pet: firstPet)
             } else {
                 self.activePet = nil
             }

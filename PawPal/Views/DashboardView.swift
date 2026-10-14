@@ -20,6 +20,7 @@ struct DashboardView: View {
     @State private var isRemindersListPresented: Bool = false
     @State private var isTipsListPresented: Bool = false
     @State private var isActivityHistoryPresented: Bool = false
+    @State private var isCareStorePresented: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -37,6 +38,9 @@ struct DashboardView: View {
                     
                     // 3. Quick Action Grid
                     quickActionsSection
+                    
+                    // 3b. Pet Care Store & CleverTap Testing Hub
+                    careStorePromoBanner
                     
                     // 4. Today's Care Activity Section
                     todayActivitySection
@@ -124,6 +128,9 @@ struct DashboardView: View {
                 if let pet = viewModel.activePet {
                     ActivityLogView(petId: pet.id, showOnlyList: true, onActivityLogged: {})
                 }
+            }
+            .sheet(isPresented: $isCareStorePresented) {
+                CareStoreView()
             }
         }
     }
@@ -248,6 +255,52 @@ struct DashboardView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
+            .background(Color.cardBackground)
+            .cornerRadius(12)
+        }
+    }
+    
+    // MARK: - Care Store & CleverTap Testing Banner
+    
+    private var careStorePromoBanner: some View {
+        Button(action: {
+            isCareStorePresented = true
+        }) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color.orange.opacity(0.18))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "bag.fill")
+                        .font(.headline)
+                        .foregroundColor(.orange)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text("Pet Care Store & Lab")
+                            .font(.subheadline.bold())
+                            .foregroundColor(.primary)
+                        Text("CleverTap Lab")
+                            .font(.system(size: 9, weight: .bold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.15))
+                            .foregroundColor(.orange)
+                            .cornerRadius(4)
+                    }
+                    Text("Order nutrition kits & test 'Charged' purchase events live")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption.bold())
+                    .foregroundColor(.secondary)
+            }
+            .padding(12)
             .background(Color.cardBackground)
             .cornerRadius(12)
         }

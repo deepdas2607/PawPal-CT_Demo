@@ -53,6 +53,7 @@ struct OnboardingView: View {
                     Button(action: {
                         Task {
                             if let createdPet = await viewModel.createPetProfile() {
+                                PawPalCleverTapBridge.onPetProfileCreated(pet: createdPet)
                                 onProfileCreated(createdPet)
                             }
                         }

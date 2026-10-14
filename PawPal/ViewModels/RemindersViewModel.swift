@@ -96,6 +96,9 @@ class RemindersViewModel: ObservableObject {
                 ]
             )
             
+            // Track via CleverTap Bridge
+            PawPalCleverTapBridge.onReminderScheduled(reminder: reminder, petName: "My Pet")
+            
             reminders.insert(reminder, at: 0)
             
             // Reset form
@@ -122,6 +125,8 @@ class RemindersViewModel: ObservableObject {
             
             if updated.isCompleted {
                 notificationService.cancelNotification(reminderId: reminder.id)
+                // Track completed reminder via CleverTap Bridge
+                PawPalCleverTapBridge.onReminderCompleted(reminder: updated, petName: "My Pet")
             }
             
             if let index = reminders.firstIndex(where: { $0.id == reminder.id }) {
