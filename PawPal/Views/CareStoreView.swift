@@ -403,7 +403,6 @@ struct CareStoreView: View {
             
             HStack(spacing: 8) {
                 Button(action: {
-                    dismiss()
                     inboxManager.showCleverTapInbox()
                 }) {
                     Text("Launch Official CT Inbox")

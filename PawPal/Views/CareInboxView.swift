@@ -14,6 +14,7 @@ struct CareInboxView: View {
     @ObservedObject private var inboxManager = CleverTapInboxManager.shared
     @ObservedObject private var inspectorVM = LiveInspectorViewModel.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var isOfficialInboxPresented: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -51,6 +52,9 @@ struct CareInboxView: View {
                     }
                 }
             }
+            .sheet(isPresented: $isOfficialInboxPresented) {
+                CleverTapInboxSheet()
+            }
             .onAppear {
                 inboxManager.refreshInbox()
             }
@@ -61,8 +65,7 @@ struct CareInboxView: View {
     
     private var officialInboxBanner: some View {
         Button(action: {
-            dismiss()
-            inboxManager.showCleverTapInbox()
+            isOfficialInboxPresented = true
         }) {
             HStack(spacing: 12) {
                 ZStack {
@@ -210,3 +213,4 @@ struct CareInboxView: View {
         .padding(.vertical, 40)
     }
 }
+

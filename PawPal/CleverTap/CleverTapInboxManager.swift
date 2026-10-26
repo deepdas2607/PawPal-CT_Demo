@@ -9,6 +9,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 import Combine
 import CleverTapSDK
 
@@ -61,10 +62,8 @@ class CleverTapInboxManager: NSObject, ObservableObject, CleverTapInboxViewContr
         NSLog("[CleverTap] App Inbox refreshed: %ld total, %ld unread", totalCount, unreadCount)
     }
     
-    /// Presents the official CleverTap Inbox ViewController configured with PawPal theme.
-    func showCleverTapInbox() {
-        guard let cleverTap = CleverTap.sharedInstance() else { return }
-        
+    /// Builds the standard PawPal-themed style config for CleverTap App Inbox.
+    func createStyleConfig() -> CleverTapInboxStyleConfig {
         let style = CleverTapInboxStyleConfig()
         style.title = "PawPal Care Inbox"
         style.backgroundColor = .systemBackground
@@ -76,7 +75,14 @@ class CleverTapInboxManager: NSObject, ObservableObject, CleverTapInboxViewContr
         style.firstTabTitle = "All Updates"
         style.noMessageViewText = "No notifications in your pet care inbox yet."
         style.noMessageViewTextColor = .secondaryLabel
+        return style
+    }
+    
+    /// Presents the official CleverTap Inbox ViewController configured with PawPal theme.
+    func showCleverTapInbox() {
+        guard let cleverTap = CleverTap.sharedInstance() else { return }
         
+        let style = createStyleConfig()
         guard let inboxController = cleverTap.newInboxViewController(with: style, andDelegate: self) else {
             NSLog("[CleverTap] Failed to create CleverTapInboxViewController")
             return
@@ -85,24 +91,32 @@ class CleverTapInboxManager: NSObject, ObservableObject, CleverTapInboxViewContr
         let navController = UINavigationController(rootViewController: inboxController)
         navController.modalPresentationStyle = .pageSheet
         
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
-            var topVC = rootVC
-            while let presented = topVC.presentedViewController {
-                topVC = presented
-            }
-            topVC.present(navController, animated: true)
-            
-            LiveInspectorViewModel.shared.log(
-                title: "CleverTap: Show App Inbox",
-                category: .cleverTap,
-                payload: [
-                    "style": "PawPal Orange Theme",
-                    "totalMessages": totalCount,
-                    "unreadMessages": unreadCount
-                ]
-            )
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }) ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
+              let window = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first,
+              let rootVC = window.rootViewController else {
+            NSLog("[CleverTap] Could not find window rootViewController")
+            return
         }
+        
+        // Find topmost view controller that is NOT currently being dismissed
+        var topVC = rootVC
+        while let presented = topVC.presentedViewController, !presented.isBeingDismissed {
+            topVC = presented
+        }
+        
+        topVC.present(navController, animated: true)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: Show App Inbox",
+            category: .cleverTap,
+            payload: [
+                "style": "PawPal Orange Theme",
+                "totalMessages": totalCount,
+                "unreadMessages": unreadCount
+            ]
+        )
     }
     
     /// Marks an individual inbox message as read.
@@ -175,3 +189,24 @@ class CleverTapInboxManager: NSObject, ObservableObject, CleverTapInboxViewContr
         }
     }
 }
+
+/// SwiftUI wrapper to present the official CleverTap Inbox ViewController cleanly in a SwiftUI sheet.
+struct CleverTapInboxSheet: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let manager = CleverTapInboxManager.shared
+        let style = manager.createStyleConfig()
+        
+        if let cleverTap = CleverTap.sharedInstance(),
+           let controller = cleverTap.newInboxViewController(with: style, andDelegate: manager) {
+            let navController = UINavigationController(rootViewController: controller)
+            return navController
+        }
+        
+        let emptyVC = UIViewController()
+        emptyVC.title = "Care Inbox"
+        return UINavigationController(rootViewController: emptyVC)
+    }
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+}
+
