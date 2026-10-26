@@ -12,6 +12,9 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @ObservedObject private var inspectorVM = LiveInspectorViewModel.shared
+    @ObservedObject private var inboxManager = CleverTapInboxManager.shared
+    @ObservedObject private var customTemplates = CleverTapCustomTemplates.shared
+    @ObservedObject private var nativeDisplayManager = CleverTapNativeDisplayManager.shared
     
     // Navigation / sheet states
     @State private var isLogActivityPresented: Bool = false
@@ -21,11 +24,25 @@ struct DashboardView: View {
     @State private var isTipsListPresented: Bool = false
     @State private var isActivityHistoryPresented: Bool = false
     @State private var isCareStorePresented: Bool = false
+    @State private var isInboxPresented: Bool = false
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    // 0. Active Custom Code In-App Template (from CleverTap)
+                    if let template = customTemplates.activeCustomTemplate {
+                        CustomInAppBannerView(
+                            model: template,
+                            onDismiss: {
+                                customTemplates.dismissActiveTemplate()
+                            },
+                            onAction: {
+                                customTemplates.triggerAction()
+                            }
+                        )
+                    }
+                    
                     // 1. Connection Error Notice (if backend is offline)
                     if let error = viewModel.errorMessage {
                         errorBannerView(error)
@@ -41,6 +58,17 @@ struct DashboardView: View {
                     
                     // 3b. Pet Care Store & CleverTap Testing Hub
                     careStorePromoBanner
+                    
+                    // 3c. CleverTap Native Display Section (when units are loaded)
+                    if !nativeDisplayManager.activeDisplayUnits.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Personalized Care Recommendations")
+                                .font(.headline)
+                            ForEach(nativeDisplayManager.activeDisplayUnits, id: \.unitID) { unit in
+                                NativeDisplayCardView(unit: unit)
+                            }
+                        }
+                    }
                     
                     // 4. Today's Care Activity Section
                     todayActivitySection
@@ -76,24 +104,52 @@ struct DashboardView: View {
                 }
                 
                 ToolbarItem(placement: .trailingPlacement) {
-                    Button(action: {
-                        isProfilePresented = true
-                    }) {
-                        Image(systemName: "person.crop.circle")
-                            .font(.title3)
-                            .foregroundColor(.orange)
+                    HStack(spacing: 12) {
+                        // App Inbox Button with unread badge
+                        Button(action: {
+                            isInboxPresented = true
+                        }) {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "bell.fill")
+                                    .font(.title3)
+                                    .foregroundColor(.orange)
+                                
+                                if inboxManager.unreadCount > 0 {
+                                    Text("\(inboxManager.unreadCount)")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(minWidth: 16, minHeight: 16)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                        .offset(x: 8, y: -6)
+                                }
+                            }
+                        }
+                        
+                        Button(action: {
+                            isProfilePresented = true
+                        }) {
+                            Image(systemName: "person.crop.circle")
+                                .font(.title3)
+                                .foregroundColor(.orange)
+                        }
                     }
                 }
             }
             .refreshable {
                 await viewModel.loadDashboardData()
+                inboxManager.refreshInbox()
             }
             .task {
                 await viewModel.loadDashboardData()
+                inboxManager.refreshInbox()
             }
             // Sheets
             .sheet(isPresented: $inspectorVM.isInspectorPresented) {
                 LiveInspectorView()
+            }
+            .sheet(isPresented: $isInboxPresented) {
+                CareInboxView()
             }
             .sheet(isPresented: $isLogActivityPresented) {
                 if let pet = viewModel.activePet {

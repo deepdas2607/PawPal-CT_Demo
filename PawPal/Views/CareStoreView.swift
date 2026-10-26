@@ -2,19 +2,26 @@
 //  CareStoreView.swift
 //  PawPal - View Layer
 //
-//  Demo Care Store & CleverTap Testing Hub.
+//  Comprehensive CleverTap Testing Hub & Care Store.
 //  Enables Customer Success Engineers and developers to test:
 //  - "Charged" purchase events with order details and items
-//  - Profile attribute updates (MSG-push, MSG-email, DND settings)
-//  - User identity switching via onUserLogin
+//  - OS Push Notifications (Direct Prompt, Push Primer Alert & Half-Interstitial, Permission Status)
+//  - In-App Controls (Suspend, Resume, Discard)
+//  - Custom Code In-App Templates (Banner Template & Haptic Function)
+//  - App Inbox (Official CleverTap Controller & Sync)
+//  - User Identity switching (onUserLogin) and Communication Preferences (MSG-push, MSG-email, DND)
 //
 
 import SwiftUI
+import UserNotifications
+import CleverTapSDK
 
 /// Care Store & CleverTap test bench view.
 struct CareStoreView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var inspectorVM = LiveInspectorViewModel.shared
+    @ObservedObject private var inboxManager = CleverTapInboxManager.shared
+    @ObservedObject private var customTemplates = CleverTapCustomTemplates.shared
     
     // Store items available for purchase
     struct StoreItem: Identifiable {
@@ -69,6 +76,8 @@ struct CareStoreView: View {
     @State private var purchasedItem: StoreItem? = nil
     @State private var showPurchaseAlert: Bool = false
     @State private var lastTransactionId: String = ""
+    @State private var statusAlertMessage: String = ""
+    @State private var showStatusAlert: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -78,23 +87,35 @@ struct CareStoreView: View {
                     // 1. CSE Testing Banner
                     testingBanner
                     
-                    // 2. Products Section
+                    // 2. OS Push Notifications Lab
+                    pushNotificationLabSection
+                    
+                    // 3. In-App Notification Controls Lab
+                    inAppControlsLabSection
+                    
+                    // 4. Custom Code In-App Templates Lab
+                    customTemplatesLabSection
+                    
+                    // 5. App Inbox Testing Lab
+                    appInboxLabSection
+                    
+                    // 6. Care Store Purchases ("Charged" Event)
                     productsSection
                     
-                    // 3. Payment Mode Selector
+                    // 7. Payment Mode Selector
                     paymentModeSection
                     
-                    // 4. Communication Preferences (CleverTap DND & Channels)
+                    // 8. Communication Preferences (CleverTap DND & Channels)
                     communicationPrefsSection
                     
-                    // 5. User Profile Switcher (onUserLogin testing)
+                    // 9. User Profile Switcher (onUserLogin testing)
                     userProfileSwitcherSection
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
             }
             .background(Color.appBackground.ignoresSafeArea())
-            .inlineTitle("Care Store & Lab")
+            .inlineTitle("CleverTap Testing Lab")
             .toolbar {
                 ToolbarItem(placement: .leadingPlacement) {
                     Button("Close") {
@@ -128,6 +149,11 @@ struct CareStoreView: View {
                     Text("Charged $\(String(format: "%.2f", item.price)) for '\(item.name)' via \(selectedPaymentMode).\n\nTransaction ID: \(lastTransactionId)\nSpecial CleverTap 'Charged' event dispatched.")
                 }
             }
+            .alert("CleverTap Status", isPresented: $showStatusAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(statusAlertMessage)
+            }
         }
     }
     
@@ -135,14 +161,14 @@ struct CareStoreView: View {
     
     private var testingBanner: some View {
         HStack(spacing: 12) {
-            Image(systemName: "creditcard.circle.fill")
+            Image(systemName: "antenna.radiowaves.left.and.right")
                 .font(.system(size: 36))
                 .foregroundColor(.orange)
             
             VStack(alignment: .leading, spacing: 3) {
-                Text("CleverTap Purchase & Profile Lab")
+                Text("Enterprise CleverTap Test Lab")
                     .font(.subheadline.bold())
-                Text("Tap any item below to trigger a CleverTap 'Charged' transaction with full items array and payment details.")
+                Text("Test real SDK interactions: Push Primers, In-App controls, Custom Code Templates, App Inbox, and 'Charged' purchase events live.")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -152,11 +178,268 @@ struct CareStoreView: View {
         .cornerRadius(12)
     }
     
-    // MARK: - Products List
+    // MARK: - Push Notifications Lab
+    
+    private var pushNotificationLabSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "bell.badge.fill")
+                    .foregroundColor(.orange)
+                Text("OS Push Notifications & Primer")
+                    .font(.headline)
+            }
+            
+            VStack(spacing: 8) {
+                Button(action: {
+                    CleverTapManager.shared.promptPushPrimer(isAlert: true)
+                }) {
+                    HStack {
+                        Image(systemName: "exclamationmark.bubble.fill")
+                        Text("Prompt Push Primer (Alert Style)")
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.caption)
+                    }
+                    .font(.caption.bold())
+                    .padding(12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.orange.opacity(0.12))
+                    .foregroundColor(.orange)
+                    .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    CleverTapManager.shared.promptPushPrimer(isAlert: false)
+                }) {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.forward")
+                        Text("Prompt Push Primer (Half-Interstitial)")
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.caption)
+                    }
+                    .font(.caption.bold())
+                    .padding(12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue.opacity(0.12))
+                    .foregroundColor(.blue)
+                    .cornerRadius(8)
+                }
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        CleverTapManager.shared.promptForPushPermission(showFallbackSettings: true)
+                    }) {
+                        Text("Direct OS Prompt")
+                            .font(.caption.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.purple.opacity(0.12))
+                            .foregroundColor(.purple)
+                            .cornerRadius(8)
+                    }
+                    
+                    Button(action: {
+                        checkPermissionStatus()
+                    }) {
+                        Text("Check Status")
+                            .font(.caption.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.secondary.opacity(0.12))
+                            .foregroundColor(.primary)
+                            .cornerRadius(8)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - In-App Controls Lab
+    
+    private var inAppControlsLabSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "slider.horizontal.3")
+                    .foregroundColor(.blue)
+                Text("In-App Notification Controls")
+                    .font(.headline)
+            }
+            
+            HStack(spacing: 8) {
+                Button(action: {
+                    CleverTapManager.shared.suspendInAppNotifications()
+                    statusAlertMessage = "In-App notifications suspended for current session."
+                    showStatusAlert = true
+                }) {
+                    Text("Suspend")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.yellow.opacity(0.18))
+                        .foregroundColor(.orange)
+                        .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    CleverTapManager.shared.resumeInAppNotifications()
+                    statusAlertMessage = "In-App notifications resumed."
+                    showStatusAlert = true
+                }) {
+                    Text("Resume")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.green.opacity(0.18))
+                        .foregroundColor(.green)
+                        .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    CleverTapManager.shared.discardInAppNotifications(dismissActive: true)
+                    statusAlertMessage = "In-App queue discarded."
+                    showStatusAlert = true
+                }) {
+                    Text("Discard")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.red.opacity(0.18))
+                        .foregroundColor(.red)
+                        .cornerRadius(8)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Custom Code In-App Templates Lab
+    
+    private var customTemplatesLabSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "wand.and.stars")
+                    .foregroundColor(.purple)
+                Text("Custom Code In-App Templates")
+                    .font(.headline)
+            }
+            
+            Text("Test visual templates (PetCare_Alert_Banner) and non-visual functions (PetCare_Haptic_Alert) registered with CleverTap.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            VStack(spacing: 8) {
+                Button(action: {
+                    dismiss()
+                    customTemplates.simulateBanner()
+                }) {
+                    HStack {
+                        Image(systemName: "viewfinder")
+                        Text("Trigger Custom Banner Template")
+                        Spacer()
+                        Image(systemName: "play.fill").font(.caption2)
+                    }
+                    .font(.caption.bold())
+                    .padding(12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.purple.opacity(0.12))
+                    .foregroundColor(.purple)
+                    .cornerRadius(8)
+                }
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        customTemplates.simulateHaptic()
+                        statusAlertMessage = "Haptic turn alert function executed."
+                        showStatusAlert = true
+                    }) {
+                        Text("Trigger Haptic Function")
+                            .font(.caption.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.blue.opacity(0.12))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
+                    }
+                    
+                    Button(action: {
+                        customTemplates.syncTemplatesWithDashboard()
+                        statusAlertMessage = "Templates synced with CleverTap Dashboard!"
+                        showStatusAlert = true
+                    }) {
+                        Text("Sync to Dashboard")
+                            .font(.caption.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.orange.opacity(0.12))
+                            .foregroundColor(.orange)
+                            .cornerRadius(8)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - App Inbox Lab
+    
+    private var appInboxLabSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "tray.full.fill")
+                    .foregroundColor(.green)
+                Text("App Inbox Controls")
+                    .font(.headline)
+                Spacer()
+                Text("\(inboxManager.unreadCount) unread")
+                    .font(.caption2.bold())
+                    .foregroundColor(.secondary)
+            }
+            
+            HStack(spacing: 8) {
+                Button(action: {
+                    dismiss()
+                    inboxManager.showCleverTapInbox()
+                }) {
+                    Text("Launch Official CT Inbox")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.green.opacity(0.15))
+                        .foregroundColor(.green)
+                        .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    inboxManager.refreshInbox()
+                    statusAlertMessage = "App Inbox refreshed: \(inboxManager.totalCount) total, \(inboxManager.unreadCount) unread."
+                    showStatusAlert = true
+                }) {
+                    Text("Sync Messages")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.secondary.opacity(0.12))
+                        .foregroundColor(.primary)
+                        .cornerRadius(8)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Products List ("Charged" Event)
     
     private var productsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Featured Care Packages")
+            Text("Featured Care Packages (Charged Event)")
                 .font(.headline)
             
             ForEach(items) { item in
@@ -280,6 +563,8 @@ struct CareStoreView: View {
                         species: "Dog",
                         breed: "Golden Retriever"
                     )
+                    statusAlertMessage = "Logged in as Sarah Jenkins (Luna - Golden Retriever)."
+                    showStatusAlert = true
                 }) {
                     Text("Login as Sarah")
                         .font(.caption.bold())
@@ -300,6 +585,8 @@ struct CareStoreView: View {
                         species: "Cat",
                         breed: "Scottish Fold"
                     )
+                    statusAlertMessage = "Logged in as Alex Chen (Mochi - Scottish Fold)."
+                    showStatusAlert = true
                 }) {
                     Text("Login as Alex")
                         .font(.caption.bold())
@@ -342,5 +629,20 @@ struct CareStoreView: View {
             dndEmail: !emailMarketingEnabled
         )
     }
+    
+    private func checkPermissionStatus() {
+        CleverTapManager.shared.getNotificationPermissionStatus { status in
+            let statusText: String
+            switch status {
+            case .authorized: statusText = "Authorized ✅"
+            case .denied: statusText = "Denied ❌"
+            case .notDetermined: statusText = "Not Determined ⏳"
+            case .provisional: statusText = "Provisional ⚠️"
+            case .ephemeral: statusText = "Ephemeral ⏱️"
+            @unknown default: statusText = "Unknown"
+            }
+            statusAlertMessage = "Current Push Notification Permission Status: \(statusText)"
+            showStatusAlert = true
+        }
+    }
 }
-
