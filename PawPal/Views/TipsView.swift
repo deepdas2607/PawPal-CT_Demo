@@ -37,6 +37,8 @@ struct TipsView: View {
             }
             .background(Color.appBackground)
             .inlineTitle("Pet Care Tips")
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color.cardBackground.opacity(0.85), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .leadingPlacement) {
                     Button("Close") {
@@ -137,8 +139,11 @@ struct TipsView: View {
                     .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
                 }
             }
-            .padding(16)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 60)
         }
+        .scrollIndicators(.visible)
     }
     
     // MARK: - Empty State

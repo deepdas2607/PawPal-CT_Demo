@@ -28,62 +28,73 @@ struct DashboardView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // 0. Active Custom Code In-App Template (from CleverTap)
-                    if let template = customTemplates.activeCustomTemplate {
-                        CustomInAppBannerView(
-                            model: template,
-                            onDismiss: {
-                                customTemplates.dismissActiveTemplate()
-                            },
-                            onAction: {
-                                customTemplates.triggerAction()
-                            }
-                        )
-                    }
-                    
-                    // 1. Connection Error Notice (if backend is offline)
-                    if let error = viewModel.errorMessage {
-                        errorBannerView(error)
-                    }
-                    
-                    // 2. Pet Hero Card
-                    if let pet = viewModel.activePet {
-                        petHeaderCard(pet)
-                    }
-                    
-                    // 3. Quick Action Grid
-                    quickActionsSection
-                    
-                    // 3b. Pet Care Store & CleverTap Testing Hub
-                    careStorePromoBanner
-                    
-                    // 3c. CleverTap Native Display Section (when units are loaded)
-                    if !nativeDisplayManager.activeDisplayUnits.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Personalized Care Recommendations")
-                                .font(.headline)
-                            ForEach(nativeDisplayManager.activeDisplayUnits, id: \.unitID) { unit in
-                                NativeDisplayCardView(unit: unit)
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // 0. Active Custom Code In-App Template (from CleverTap)
+                        if let template = customTemplates.activeCustomTemplate {
+                            CustomInAppBannerView(
+                                model: template,
+                                onDismiss: {
+                                    customTemplates.dismissActiveTemplate()
+                                },
+                                onAction: {
+                                    customTemplates.triggerAction()
+                                }
+                            )
+                        }
+                        
+                        // 1. Connection Error Notice (if backend is offline)
+                        if let error = viewModel.errorMessage {
+                            errorBannerView(error)
+                        }
+                        
+                        // 2. Pet Hero Card
+                        if let pet = viewModel.activePet {
+                            petHeaderCard(pet)
+                        }
+                        
+                        // 3. Quick Action Grid
+                        quickActionsSection
+                        
+                        // 3b. Pet Care Store & CleverTap Testing Hub
+                        careStorePromoBanner
+                        
+                        // 3c. CleverTap Native Display Section (when units are loaded)
+                        if !nativeDisplayManager.activeDisplayUnits.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Personalized Care Recommendations")
+                                    .font(.headline)
+                                ForEach(nativeDisplayManager.activeDisplayUnits, id: \.unitID) { unit in
+                                    NativeDisplayCardView(unit: unit)
+                                }
                             }
                         }
+                        
+                        // 4. Today's Care Activity Section
+                        todayActivitySection
+                        
+                        // 5. Upcoming Reminders Section
+                        upcomingRemindersSection
+                        
+                        // 6. Featured Tips Section
+                        featuredTipsSection
+                        
+                        // 7. Dashboard Footer
+                        dashboardFooter
                     }
-                    
-                    // 4. Today's Care Activity Section
-                    todayActivitySection
-                    
-                    // 5. Upcoming Reminders Section
-                    upcomingRemindersSection
-                    
-                    // 6. Featured Tips Section
-                    featuredTipsSection
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 60)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .scrollIndicators(.visible)
             }
-            .background(Color.appBackground.ignoresSafeArea())
-            .inlineTitle("PawPal")
+            .navigationTitle("PawPal")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color.cardBackground.opacity(0.85), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .leadingPlacement) {
                     // Live Activity & Payload Inspector Button
@@ -553,5 +564,25 @@ struct DashboardView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Dashboard Footer
+    
+    private var dashboardFooter: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "pawprint.fill")
+                    .font(.footnote)
+                    .foregroundColor(.orange)
+                Text("PawPal Pet Companion")
+                    .font(.footnote.bold())
+                    .foregroundColor(.secondary)
+            }
+            Text("All pet care reminders & activities are up to date.")
+                .font(.caption2)
+                .foregroundColor(.secondary.opacity(0.8))
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
     }
 }

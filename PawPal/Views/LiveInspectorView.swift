@@ -30,6 +30,8 @@ struct LiveInspectorView: View {
                 }
             }
             .inlineTitle("Live Activity & Payload Inspector")
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color.cardBackground.opacity(0.85), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .leadingPlacement) {
                     Button(role: .destructive, action: {

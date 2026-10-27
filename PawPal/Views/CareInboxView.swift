@@ -18,24 +18,31 @@ struct CareInboxView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    
-                    // Official CleverTap Inbox Launcher Banner
-                    officialInboxBanner
-                    
-                    // Messages List or Empty State
-                    if inboxManager.messages.isEmpty {
-                        emptyInboxView
-                    } else {
-                        messagesSection
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 16) {
+                        
+                        // Official CleverTap Inbox Launcher Banner
+                        officialInboxBanner
+                        
+                        // Messages List or Empty State
+                        if inboxManager.messages.isEmpty {
+                            emptyInboxView
+                        } else {
+                            messagesSection
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 60)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .scrollIndicators(.visible)
             }
-            .background(Color.appBackground.ignoresSafeArea())
             .inlineTitle("Care Inbox")
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color.cardBackground.opacity(0.85), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .leadingPlacement) {
                     Button("Close") {

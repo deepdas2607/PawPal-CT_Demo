@@ -81,41 +81,48 @@ struct CareStoreView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    
-                    // 1. CSE Testing Banner
-                    testingBanner
-                    
-                    // 2. OS Push Notifications Lab
-                    pushNotificationLabSection
-                    
-                    // 3. In-App Notification Controls Lab
-                    inAppControlsLabSection
-                    
-                    // 4. Custom Code In-App Templates Lab
-                    customTemplatesLabSection
-                    
-                    // 5. App Inbox Testing Lab
-                    appInboxLabSection
-                    
-                    // 6. Care Store Purchases ("Charged" Event)
-                    productsSection
-                    
-                    // 7. Payment Mode Selector
-                    paymentModeSection
-                    
-                    // 8. Communication Preferences (CleverTap DND & Channels)
-                    communicationPrefsSection
-                    
-                    // 9. User Profile Switcher (onUserLogin testing)
-                    userProfileSwitcherSection
+            ZStack {
+                Color.appBackground.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        
+                        // 1. CSE Testing Banner
+                        testingBanner
+                        
+                        // 2. OS Push Notifications Lab
+                        pushNotificationLabSection
+                        
+                        // 3. In-App Notification Controls Lab
+                        inAppControlsLabSection
+                        
+                        // 4. Custom Code In-App Templates Lab
+                        customTemplatesLabSection
+                        
+                        // 5. App Inbox Testing Lab
+                        appInboxLabSection
+                        
+                        // 6. Care Store Purchases ("Charged" Event)
+                        productsSection
+                        
+                        // 7. Payment Mode Selector
+                        paymentModeSection
+                        
+                        // 8. Communication Preferences (CleverTap DND & Channels)
+                        communicationPrefsSection
+                        
+                        // 9. User Profile Switcher (onUserLogin testing)
+                        userProfileSwitcherSection
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 60)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .scrollIndicators(.visible)
             }
-            .background(Color.appBackground.ignoresSafeArea())
             .inlineTitle("CleverTap Testing Lab")
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color.cardBackground.opacity(0.85), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .leadingPlacement) {
                     Button("Close") {
