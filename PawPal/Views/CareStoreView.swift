@@ -22,6 +22,7 @@ struct CareStoreView: View {
     @ObservedObject private var inspectorVM = LiveInspectorViewModel.shared
     @ObservedObject private var inboxManager = CleverTapInboxManager.shared
     @ObservedObject private var customTemplates = CleverTapCustomTemplates.shared
+    @ObservedObject private var variables = CleverTapVariables.shared
     
     // Store items available for purchase
     struct StoreItem: Identifiable {
@@ -72,6 +73,11 @@ struct CareStoreView: View {
     @State private var emailMarketingEnabled: Bool = true
     @State private var phoneDndEnabled: Bool = false
     
+    // Privacy, offline and network reporting state
+    @State private var isOptedOut: Bool = false
+    @State private var isOfflineMode: Bool = false
+    @State private var networkReportingEnabled: Bool = true
+    
     // Feedback alerts
     @State private var purchasedItem: StoreItem? = nil
     @State private var showPurchaseAlert: Bool = false
@@ -90,34 +96,40 @@ struct CareStoreView: View {
                         // 1. CSE Testing Banner
                         testingBanner
                         
-                        // 2. OS Push Notifications Lab
+                        // 2. Product Experiences & Remote Config Lab (CTVar)
+                        remoteConfigLabSection
+                        
+                        // 3. OS Push Notifications Lab
                         pushNotificationLabSection
                         
-                        // 3. In-App Notification Controls Lab
+                        // 4. In-App Notification Controls Lab
                         inAppControlsLabSection
                         
-                        // 4. Custom Code In-App Templates Lab
+                        // 5. Custom Code In-App Templates Lab
                         customTemplatesLabSection
                         
-                        // 5. App Inbox Testing Lab
+                        // 6. App Inbox Testing Lab
                         appInboxLabSection
                         
-                        // 6. Care Store Purchases ("Charged" Event)
+                        // 7. Care Store Purchases ("Charged" Event)
                         productsSection
                         
-                        // 7. Payment Mode Selector
+                        // 8. Payment Mode Selector
                         paymentModeSection
                         
-                        // 8. Communication Preferences (CleverTap DND & Channels)
+                        // 9. Communication Preferences (CleverTap DND & Channels)
                         communicationPrefsSection
                         
-                        // 9. User Profile Demographics & Multi-Values Lab
+                        // 10. User Profile Demographics & Multi-Values Lab
                         userProfileAttributesLabSection
                         
-                        // 10. Custom Events & Data Types Lab
+                        // 11. Custom Events & Data Types Lab
                         customEventsLabSection
                         
-                        // 11. User Profile Switcher (onUserLogin testing)
+                        // 12. Geo-Location & Privacy Controls Lab
+                        geoLocationAndPrivacyLabSection
+                        
+                        // 13. User Profile Switcher (onUserLogin testing)
                         userProfileSwitcherSection
                     }
                     .padding(.horizontal, 16)
@@ -188,6 +200,165 @@ struct CareStoreView: View {
         }
         .padding(14)
         .background(Color.orange.opacity(0.1))
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Product Experiences & Remote Variables Lab (CTVar)
+    
+    private var remoteConfigLabSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "slider.horizontal.3")
+                    .foregroundColor(.indigo)
+                Text("Product Experiences & Remote Config")
+                    .font(.headline)
+            }
+            
+            Text("Define and control dynamic app variables (CTVar) from CleverTap Dashboard for real-time feature flags, text updates, and A/B tests without app store builds.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            // Variable Cards
+            VStack(spacing: 8) {
+                // 1. String Var
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("welcome_banner_text (String)")
+                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                            .foregroundColor(.secondary)
+                        Text(variables.welcomeBannerText)
+                            .font(.caption.bold())
+                            .foregroundColor(.primary)
+                    }
+                    Spacer()
+                    Text("String")
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.indigo.opacity(0.12))
+                        .foregroundColor(.indigo)
+                        .cornerRadius(4)
+                }
+                .padding(10)
+                .background(Color.appBackground)
+                .cornerRadius(8)
+                
+                // 2. Boolean Var & Integer Var
+                HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("enable_special_care_discount")
+                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(variables.enableSpecialCareDiscount ? Color.green : Color.red)
+                                .frame(width: 8, height: 8)
+                            Text(variables.enableSpecialCareDiscount ? "TRUE (Enabled)" : "FALSE (Disabled)")
+                                .font(.caption.bold())
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(Color.appBackground)
+                    .cornerRadius(8)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("care_discount_percentage")
+                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .foregroundColor(.secondary)
+                        Text("\(variables.careDiscountPercentage)% OFF")
+                            .font(.caption.bold())
+                            .foregroundColor(.orange)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(Color.appBackground)
+                    .cornerRadius(8)
+                }
+                
+                // 3. Dictionary Var
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("featured_category_config (Dictionary)")
+                            .font(.system(size: 11, weight: .bold, design: .monospaced))
+                            .foregroundColor(.secondary)
+                        Text("Category: \(variables.featuredCategory) • Badge: \(variables.featuredCategoryBadge)")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                    Spacer()
+                    Text("Dict")
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.purple.opacity(0.12))
+                        .foregroundColor(.purple)
+                        .cornerRadius(4)
+                }
+                .padding(10)
+                .background(Color.appBackground)
+                .cornerRadius(8)
+            }
+            
+            // Action Buttons
+            HStack(spacing: 8) {
+                Button(action: {
+                    variables.syncVariables()
+                    statusAlertMessage = "Dispatched syncVariables() to CleverTap Dashboard. Variable definitions are synced for remote configuration."
+                    showStatusAlert = true
+                }) {
+                    HStack(spacing: 6) {
+                        if variables.isSyncing {
+                            ProgressView().scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                        }
+                        Text("Sync to Dashboard")
+                    }
+                    .font(.caption.bold())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Color.indigo.opacity(0.15))
+                    .foregroundColor(.indigo)
+                    .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    variables.fetchVariables { success in
+                        statusAlertMessage = success ? "Variables fetched successfully from CleverTap!" : "Variable fetch completed."
+                        showStatusAlert = true
+                    }
+                }) {
+                    HStack(spacing: 6) {
+                        if variables.isFetching {
+                            ProgressView().scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "icloud.and.arrow.down")
+                        }
+                        Text("Fetch Variables")
+                    }
+                    .font(.caption.bold())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Color.teal.opacity(0.15))
+                    .foregroundColor(.teal)
+                    .cornerRadius(8)
+                }
+            }
+            
+            // Status footer
+            HStack {
+                Text("Sync: \(variables.lastSyncStatus)")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("Fetch: \(variables.lastFetchStatus)")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
         .cornerRadius(12)
     }
     
@@ -759,6 +930,118 @@ struct CareStoreView: View {
                         .background(Color.teal.opacity(0.15))
                         .foregroundColor(.teal)
                         .cornerRadius(8)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Geo-Location & Privacy Controls Lab
+    
+    private var geoLocationAndPrivacyLabSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "location.circle.fill")
+                    .foregroundColor(.blue)
+                Text("Geo-Location & Privacy Controls")
+                    .font(.headline)
+            }
+            
+            Text("Simulate pet parent coordinates for CleverTap geo-targeting campaigns and test SDK privacy flags (GDPR opt-out, offline queuing).")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            // Geo-Location Buttons
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Simulate Location (CleverTap.setLocation)")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.secondary)
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        // San Francisco Coordinates
+                        CleverTapManager.shared.setLocation(latitude: 37.7749, longitude: -122.4194)
+                        statusAlertMessage = "Set CleverTap Location to San Francisco, CA (37.7749, -122.4194)."
+                        showStatusAlert = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "mappin.and.ellipse")
+                            Text("San Francisco")
+                        }
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.blue.opacity(0.12))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                    }
+                    
+                    Button(action: {
+                        // New York Coordinates
+                        CleverTapManager.shared.setLocation(latitude: 40.7128, longitude: -74.0060)
+                        statusAlertMessage = "Set CleverTap Location to New York, NY (40.7128, -74.0060)."
+                        showStatusAlert = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "mappin.and.ellipse")
+                            Text("New York")
+                        }
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.purple.opacity(0.12))
+                        .foregroundColor(.purple)
+                        .cornerRadius(8)
+                    }
+                }
+            }
+            
+            Divider()
+            
+            // Privacy & Offline Toggles
+            VStack(spacing: 10) {
+                Toggle(isOn: $isOptedOut) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("GDPR User Opt-Out")
+                            .font(.caption.bold())
+                        Text("setOptOut(\(isOptedOut ? "true" : "false")): Pauses event tracking.")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .tint(.red)
+                .onChange(of: isOptedOut) { newValue in
+                    CleverTapManager.shared.setOptOut(enabled: newValue)
+                }
+                
+                Toggle(isOn: $isOfflineMode) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Offline Queueing Mode")
+                            .font(.caption.bold())
+                        Text("setOffline(\(isOfflineMode ? "true" : "false")): Queues SDK events locally.")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .tint(.orange)
+                .onChange(of: isOfflineMode) { newValue in
+                    CleverTapManager.shared.setOffline(offline: newValue)
+                }
+                
+                Toggle(isOn: $networkReportingEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Network Info Reporting")
+                            .font(.caption.bold())
+                        Text("enableDeviceNetworkInfoReporting: IP, Carrier & WiFi.")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .tint(.green)
+                .onChange(of: networkReportingEnabled) { newValue in
+                    CleverTapManager.shared.enableDeviceNetworkInfoReporting(enabled: newValue)
                 }
             }
         }

@@ -67,5 +67,13 @@ struct DateFormatterHelper {
         formatter.timeStyle = .none
         return formatter.string(from: date)
     }
+    
+    /// Formats a Date object to a time-only string (e.g. "3:30:15 PM").
+    static func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .medium
+        formatter.dateStyle = .none
+        return formatter.string(from: date)
+    }
 }
 

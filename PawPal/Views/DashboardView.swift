@@ -15,6 +15,7 @@ struct DashboardView: View {
     @ObservedObject private var inboxManager = CleverTapInboxManager.shared
     @ObservedObject private var customTemplates = CleverTapCustomTemplates.shared
     @ObservedObject private var nativeDisplayManager = CleverTapNativeDisplayManager.shared
+    @ObservedObject private var variables = CleverTapVariables.shared
     
     // Navigation / sheet states
     @State private var isLogActivityPresented: Bool = false
@@ -348,6 +349,7 @@ struct DashboardView: View {
                         Text("Pet Care Store & Lab")
                             .font(.subheadline.bold())
                             .foregroundColor(.primary)
+                        
                         Text("CleverTap Lab")
                             .font(.system(size: 9, weight: .bold))
                             .padding(.horizontal, 6)
@@ -355,10 +357,22 @@ struct DashboardView: View {
                             .background(Color.orange.opacity(0.15))
                             .foregroundColor(.orange)
                             .cornerRadius(4)
+                        
+                        if variables.enableSpecialCareDiscount {
+                            Text("\(variables.careDiscountPercentage)% OFF")
+                                .font(.system(size: 9, weight: .bold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.red.opacity(0.15))
+                                .foregroundColor(.red)
+                                .cornerRadius(4)
+                        }
                     }
-                    Text("Order nutrition kits & test 'Charged' purchase events live")
+                    
+                    Text(variables.welcomeBannerText)
                         .font(.caption2)
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
                 
                 Spacer()

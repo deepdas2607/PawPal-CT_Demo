@@ -9,6 +9,7 @@
 
 import Foundation
 import UIKit
+import CoreLocation
 import UserNotifications
 import CleverTapSDK
 
@@ -45,13 +46,21 @@ class CleverTapManager: NSObject, CleverTapInAppNotificationDelegate, CleverTapU
         CleverTap.sharedInstance()?.setUrlDelegate(self)
         CleverTap.sharedInstance()?.setPushPermissionDelegate(self)
         
-        // 6. Initialize App Inbox and Native Display subsystems
+        // 6. Define Product Experiences & Remote Config Variables (CTVar)
+        CleverTapVariables.shared.defineVariables()
+        
+        // 7. Initialize App Inbox and Native Display subsystems
         CleverTapInboxManager.shared.initializeInbox()
         CleverTapNativeDisplayManager.shared.initialize()
         
+        // 8. In DEBUG builds, automatically sync variables schema with CleverTap Dashboard
+        #if DEBUG
+        CleverTapVariables.shared.syncVariables()
+        #endif
+        
         isInitialized = true
         
-        // 7. Log to built-in Live Activity & Payload Inspector for CSE testing
+        // 9. Log to built-in Live Activity & Payload Inspector for CSE testing
         LiveInspectorViewModel.shared.log(
             title: "CleverTap SDK Initialized",
             category: .cleverTap,
@@ -68,7 +77,10 @@ class CleverTapManager: NSObject, CleverTapInAppNotificationDelegate, CleverTapU
                     "In-App Notifications & URL Delegate",
                     "Custom In-App Templates & Functions",
                     "App Inbox (Native & Custom)",
-                    "Native Display Units"
+                    "Native Display Units",
+                    "Product Experiences / Remote Variables (CTVar)",
+                    "Geo-Location Tracking",
+                    "Privacy & Offline Controls"
                 ]
             ]
         )
@@ -166,6 +178,58 @@ class CleverTapManager: NSObject, CleverTapInAppNotificationDelegate, CleverTapU
             title: "CleverTap: discardInAppNotifications",
             category: .cleverTap,
             payload: ["dismissActive": dismissActive]
+        )
+    }
+    
+    // MARK: - Location & Geotargeting
+    
+    /// Updates the user's location coordinates in CleverTap for geo-segmentation.
+    func setLocation(latitude: Double, longitude: Double) {
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        CleverTap.setLocation(coordinate)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: setLocation",
+            category: .cleverTap,
+            payload: [
+                "latitude": latitude,
+                "longitude": longitude
+            ]
+        )
+    }
+    
+    // MARK: - Privacy & Network Controls
+    
+    /// Sets user opt-out status for CleverTap tracking (GDPR compliance).
+    func setOptOut(enabled: Bool) {
+        CleverTap.sharedInstance()?.setOptOut(enabled)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: setOptOut (\(enabled ? "Opted Out" : "Opted In"))",
+            category: .cleverTap,
+            payload: ["optOut": enabled]
+        )
+    }
+    
+    /// Enables or disables offline mode for CleverTap SDK.
+    func setOffline(offline: Bool) {
+        CleverTap.sharedInstance()?.setOffline(offline)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: setOffline (\(offline ? "Offline" : "Online"))",
+            category: .cleverTap,
+            payload: ["offline": offline]
+        )
+    }
+    
+    /// Enables or disables device network information reporting (IP, carrier, WiFi).
+    func enableDeviceNetworkInfoReporting(enabled: Bool) {
+        CleverTap.sharedInstance()?.enableDeviceNetworkInfoReporting(enabled)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: enableDeviceNetworkInfoReporting",
+            category: .cleverTap,
+            payload: ["enabled": enabled]
         )
     }
     
