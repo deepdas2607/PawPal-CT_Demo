@@ -198,26 +198,133 @@ struct CareInboxView: View {
         }
     }
     
-    // MARK: - Empty State
+    // MARK: - Empty State & Live Delivery Diagnostics
     
     private var emptyInboxView: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "tray.fill")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary.opacity(0.5))
-                .padding(.top, 30)
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.12))
+                    .frame(width: 64, height: 64)
+                Image(systemName: "tray.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(.orange)
+            }
+            .padding(.top, 16)
             
-            Text("No Messages in Inbox")
-                .font(.headline)
+            VStack(spacing: 4) {
+                Text("0 App Inbox Messages Delivered")
+                    .font(.headline)
+                Text("No live campaigns currently targeted to this device on CleverTap")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
             
-            Text("Campaign messages sent from the CleverTap dashboard to your App Inbox will appear here.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+            // Live Connection Diagnostics Card
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .foregroundColor(.blue)
+                    Text("CleverTap Live Diagnostics")
+                        .font(.caption.bold())
+                    Spacer()
+                    Text("SDK Initialized ✅")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.green)
+                }
+                
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Targeting Device ID (CleverTap GUID):")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(.secondary)
+                    
+                    Text(CleverTap.sharedInstance()?.profileGetID() ?? "Fetching...")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundColor(.primary)
+                        .textSelection(.enabled)
+                }
+                
+                HStack {
+                    Text("Account: \(CleverTapConfig.accountId)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("Region: \(CleverTapConfig.region)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(12)
+            .background(Color.cardBackground)
+            .cornerRadius(10)
+            
+            // Probable Causes Checklist for User & CSE
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(.orange)
+                    Text("Delivery Diagnosis & Probable Causes")
+                        .font(.caption.bold())
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    diagnosticPoint(
+                        badge: "Dashboard",
+                        text: "No active App Inbox campaign published under Campaigns > App Inbox on CleverTap Dashboard."
+                    )
+                    diagnosticPoint(
+                        badge: "Targeting",
+                        text: "Campaign target segment excludes this user. Target 'All Users' or use the CleverTap ID above."
+                    )
+                    diagnosticPoint(
+                        badge: "Schedule",
+                        text: "Campaign schedule may be set to a future date or frequency cap has been exceeded."
+                    )
+                    diagnosticPoint(
+                        badge: "Sync Delay",
+                        text: "Newly published campaigns take a few moments to sync over network."
+                    )
+                }
+            }
+            .padding(12)
+            .background(Color.cardBackground)
+            .cornerRadius(10)
+            
+            // Quick Refresh Button
+            Button(action: {
+                inboxManager.refreshInbox()
+            }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Check for New Messages")
+                }
+                .font(.caption.bold())
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color.orange.opacity(0.15))
+                .foregroundColor(.orange)
+                .cornerRadius(8)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
+        .padding(.horizontal, 4)
+        .padding(.bottom, 20)
+    }
+    
+    private func diagnosticPoint(badge: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 6) {
+            Text(badge)
+                .font(.system(size: 9, weight: .bold))
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(Color.secondary.opacity(0.15))
+                .foregroundColor(.primary)
+                .cornerRadius(4)
+            Text(text)
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        }
     }
 }
 

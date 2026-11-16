@@ -359,8 +359,9 @@ struct DashboardView: View {
                             .foregroundColor(.orange)
                             .cornerRadius(4)
                         
-                        if variables.enableSpecialCareDiscount {
-                            Text("\(variables.careDiscountPercentage)% OFF")
+                        // Only show live experiment badges when delivered from CleverTap Dashboard
+                        if variables.hasLiveServerOverrides && variables.enableSpecialCareDiscount {
+                            Text("\(variables.careDiscountPercentage)% OFF (Live)")
                                 .font(.system(size: 9, weight: .bold))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
@@ -370,10 +371,17 @@ struct DashboardView: View {
                         }
                     }
                     
-                    Text(variables.welcomeBannerText)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
+                    if variables.hasLiveServerOverrides {
+                        Text(variables.welcomeBannerText)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        Text("Order nutrition kits & test 'Charged' purchase events live")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
                 }
                 
                 Spacer()

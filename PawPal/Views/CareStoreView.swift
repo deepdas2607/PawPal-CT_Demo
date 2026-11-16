@@ -24,6 +24,8 @@ struct CareStoreView: View {
     @ObservedObject private var customTemplates = CleverTapCustomTemplates.shared
     @ObservedObject private var variables = CleverTapVariables.shared
     @ObservedObject private var locationManager = CleverTapLocationManager.shared
+    @ObservedObject private var diagnostics = CleverTapDiagnostics.shared
+    @ObservedObject private var nativeDisplayManager = CleverTapNativeDisplayManager.shared
     
     // Store items available for purchase
     struct StoreItem: Identifiable {
@@ -97,6 +99,9 @@ struct CareStoreView: View {
                         // 1. CSE Testing Banner
                         testingBanner
                         
+                        // 1b. CleverTap Live Connection & Targeting Identifiers
+                        liveConnectionDiagnosticsCard
+                        
                         // 2. Product Experiences & Remote Config Lab (CTVar)
                         remoteConfigLabSection
                         
@@ -111,6 +116,9 @@ struct CareStoreView: View {
                         
                         // 6. App Inbox Testing Lab
                         appInboxLabSection
+                        
+                        // 6b. Native Display Testing Lab
+                        nativeDisplayLabSection
                         
                         // 7. Care Store Purchases ("Charged" Event)
                         productsSection
@@ -203,6 +211,65 @@ struct CareStoreView: View {
         .padding(14)
         .background(Color.orange.opacity(0.1))
         .cornerRadius(12)
+    }
+    
+    // MARK: - Live Connection & Targeting Identifiers
+    
+    private var liveConnectionDiagnosticsCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 8, height: 8)
+                Text("CleverTap Live Device Connection")
+                    .font(.caption.bold())
+                Spacer()
+                Text("Region: \(CleverTapConfig.region)")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.blue.opacity(0.12))
+                    .foregroundColor(.blue)
+                    .cornerRadius(4)
+            }
+            
+            Divider()
+            
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Device CleverTap ID (for Dashboard targeting):")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.secondary)
+                Text(CleverTap.sharedInstance()?.profileGetID() ?? "Generating...")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundColor(.primary)
+                    .textSelection(.enabled)
+            }
+            
+            HStack(spacing: 6) {
+                diagnosticChannelBadge(title: "In-App", active: diagnostics.inAppDeliveryState == .liveReceived)
+                diagnosticChannelBadge(title: "Inbox", active: inboxManager.totalCount > 0)
+                diagnosticChannelBadge(title: "Display", active: !CleverTapNativeDisplayManager.shared.activeDisplayUnits.isEmpty)
+                diagnosticChannelBadge(title: "Geofence", active: locationManager.isGeofenceMonitoringActive)
+            }
+        }
+        .padding(12)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    private func diagnosticChannelBadge(title: String, active: Bool) -> some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(active ? Color.green : Color.gray.opacity(0.4))
+                .frame(width: 6, height: 6)
+            Text(title)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundColor(active ? .primary : .secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 5)
+        .background(Color.appBackground)
+        .cornerRadius(6)
     }
     
     // MARK: - Product Experiences & Remote Variables Lab (CTVar)
@@ -348,16 +415,28 @@ struct CareStoreView: View {
                 }
             }
             
-            // Status footer
-            HStack {
-                Text("Sync: \(variables.lastSyncStatus)")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("Fetch: \(variables.lastFetchStatus)")
+            // Status footer with live vs baseline indicator
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Circle()
+                        .fill(variables.hasLiveServerOverrides ? Color.green : Color.orange)
+                        .frame(width: 8, height: 8)
+                    Text(variables.hasLiveServerOverrides ? "Live CleverTap Override Active ✅" : "Baseline Schema (No Live Campaign Overrides)")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(variables.hasLiveServerOverrides ? .green : .orange)
+                    Spacer()
+                    Text("Sync: \(variables.lastSyncStatus)")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+                
+                Text("• Diagnostic: \(variables.probableCauseMessage)")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
+            .padding(10)
+            .background(Color.appBackground)
+            .cornerRadius(8)
         }
         .padding(14)
         .background(Color.cardBackground)
@@ -505,66 +584,80 @@ struct CareStoreView: View {
     // MARK: - Custom Code In-App Templates Lab
     
     private var customTemplatesLabSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "wand.and.stars")
                     .foregroundColor(.purple)
                 Text("Custom Code In-App Templates")
                     .font(.headline)
+                Spacer()
+                if customTemplates.deliveryCount > 0 {
+                    Text("\(customTemplates.deliveryCount) Live Delivered")
+                        .font(.system(size: 9, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.green.opacity(0.15))
+                        .foregroundColor(.green)
+                        .cornerRadius(4)
+                }
             }
             
-            Text("Test visual templates (PetCare_Alert_Banner) and non-visual functions (PetCare_Haptic_Alert) registered with CleverTap.")
+            Text("Visual template ('PetCare_Alert_Banner') and function ('PetCare_Haptic_Alert') only render when delivered live by CleverTap campaigns.")
                 .font(.caption2)
                 .foregroundColor(.secondary)
             
-            VStack(spacing: 8) {
+            // Live Status Card
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Live Delivery:")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(customTemplates.lastDeliveryTimestamp)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.secondary)
+                }
+                
                 Button(action: {
-                    dismiss()
-                    customTemplates.simulateBanner()
+                    customTemplates.syncTemplatesWithDashboard()
+                    statusAlertMessage = "Template schema dispatched to CleverTap Dashboard! Marketers can now select 'PetCare_Alert_Banner' in In-App campaigns."
+                    showStatusAlert = true
                 }) {
-                    HStack {
-                        Image(systemName: "viewfinder")
-                        Text("Trigger Custom Banner Template")
-                        Spacer()
-                        Image(systemName: "play.fill").font(.caption2)
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                        Text("Sync Templates Schema to Dashboard")
                     }
                     .font(.caption.bold())
-                    .padding(12)
                     .frame(maxWidth: .infinity)
-                    .background(Color.purple.opacity(0.12))
+                    .padding(.vertical, 10)
+                    .background(Color.purple.opacity(0.15))
                     .foregroundColor(.purple)
                     .cornerRadius(8)
                 }
-                
-                HStack(spacing: 8) {
-                    Button(action: {
-                        customTemplates.simulateHaptic()
-                        statusAlertMessage = "Haptic turn alert function executed."
-                        showStatusAlert = true
-                    }) {
-                        Text("Trigger Haptic Function")
-                            .font(.caption.bold())
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Color.blue.opacity(0.12))
-                            .foregroundColor(.blue)
-                            .cornerRadius(8)
-                    }
-                    
-                    Button(action: {
-                        customTemplates.syncTemplatesWithDashboard()
-                        statusAlertMessage = "Templates synced with CleverTap Dashboard!"
-                        showStatusAlert = true
-                    }) {
-                        Text("Sync to Dashboard")
-                            .font(.caption.bold())
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Color.orange.opacity(0.12))
+            }
+            .padding(10)
+            .background(Color.appBackground)
+            .cornerRadius(8)
+            
+            // Probable Cause Diagnostics if none delivered
+            if customTemplates.deliveryCount == 0 {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 11))
                             .foregroundColor(.orange)
-                            .cornerRadius(8)
+                        Text("Delivery Diagnosis & Probable Causes")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.primary)
                     }
+                    Text("• Dashboard: Create an In-App campaign on CleverTap and select 'Custom Code Template: PetCare_Alert_Banner'.\n• Trigger: Ensure the trigger event matches (e.g., App Launch or 'Care Feature Explored').\n• Queue: Verify in-apps are not suspended in the controls above.")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineSpacing(2)
                 }
+                .padding(10)
+                .background(Color.orange.opacity(0.06))
+                .cornerRadius(8)
             }
         }
         .padding(14)
@@ -613,6 +706,56 @@ struct CareStoreView: View {
                         .foregroundColor(.primary)
                         .cornerRadius(8)
                 }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Native Display Testing Lab
+    
+    private var nativeDisplayLabSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "rectangle.stack.badge.play.fill")
+                    .foregroundColor(.cyan)
+                Text("Native Display Units")
+                    .font(.headline)
+                Spacer()
+                Text(nativeDisplayManager.activeDisplayUnits.isEmpty ? "0 Units" : "\(nativeDisplayManager.activeDisplayUnits.count) Live Units")
+                    .font(.caption2.bold())
+                    .foregroundColor(nativeDisplayManager.activeDisplayUnits.isEmpty ? .secondary : .green)
+            }
+            
+            Text("Native Display allows delivering custom JSON/visual banner cards dynamically targeted to users on CleverTap Dashboard.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            if !nativeDisplayManager.activeDisplayUnits.isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(nativeDisplayManager.activeDisplayUnits, id: \.unitID) { unit in
+                        NativeDisplayCardView(unit: unit)
+                    }
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 11))
+                            .foregroundColor(.orange)
+                        Text("Delivery Diagnosis & Probable Causes")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.primary)
+                    }
+                    Text("• Dashboard: Create a Native Display campaign under Campaigns > Native Display.\n• Targeting: Ensure the segment includes this device's CleverTap ID.\n• Trigger: If set to trigger on an event, trigger that event from the lab below.")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                        .lineSpacing(2)
+                }
+                .padding(10)
+                .background(Color.appBackground)
+                .cornerRadius(8)
             }
         }
         .padding(14)

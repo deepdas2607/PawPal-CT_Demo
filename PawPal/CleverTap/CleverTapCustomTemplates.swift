@@ -45,6 +45,7 @@ class PetCareBannerPresenter: NSObject, CTTemplatePresenter {
                 badgeTag: badgeTag,
                 contextRef: context
             )
+            CleverTapCustomTemplates.shared.recordLiveDelivery(name: context.name())
         }
         
         LiveInspectorViewModel.shared.log(
@@ -136,6 +137,10 @@ class CleverTapCustomTemplates: ObservableObject {
     static let shared = CleverTapCustomTemplates()
     
     @Published var activeCustomTemplate: CustomInAppUiModel? = nil
+    @Published var lastDeliveredTemplate: String = "None"
+    @Published var lastDeliveryTimestamp: String = "No live template delivered yet"
+    @Published var deliveryCount: Int = 0
+    @Published var isTemplateRegisteredOnDashboard: Bool = false
     
     let bannerPresenter = PetCareBannerPresenter()
     let hapticPresenter = PetCareHapticPresenter()
@@ -153,15 +158,26 @@ class CleverTapCustomTemplates: ObservableObject {
     /// Should be called during development to make templates selectable in campaigns.
     func syncTemplatesWithDashboard() {
         CleverTap.sharedInstance()?.syncCustomTemplates()
+        isTemplateRegisteredOnDashboard = true
         NSLog("[CleverTap] syncCustomTemplates invoked")
         LiveInspectorViewModel.shared.log(
-            title: "CleverTap: syncCustomTemplates",
+            title: "CleverTap: syncCustomTemplates Dispatched",
             category: .cleverTap,
             payload: [
                 "templates": ["PetCare_Alert_Banner", "PetCare_Haptic_Alert"],
-                "status": "Synced with Dashboard"
+                "status": "Template definitions synced to CleverTap Dashboard",
+                "timestamp": DateFormatterHelper.toISOString(Date())
             ]
         )
+    }
+    
+    /// Records a live template delivery received directly from CleverTap SDK.
+    func recordLiveDelivery(name: String) {
+        self.deliveryCount += 1
+        self.lastDeliveredTemplate = name
+        self.lastDeliveryTimestamp = DateFormatterHelper.formatTime(Date())
+        CleverTapDiagnostics.shared.inAppDeliveryState = .liveReceived
+        CleverTapDiagnostics.shared.lastInAppReceivedTime = self.lastDeliveryTimestamp
     }
     
     /// Dismisses the active custom template and releases the CleverTap in-app queue.
@@ -177,49 +193,5 @@ class CleverTapCustomTemplates: ObservableObject {
         model.contextRef?.triggerAction(name: "on_click_action")
         model.contextRef?.dismissed()
         activeCustomTemplate = nil
-    }
-    
-    /// Simulates template presentation for local interactive testing and demo purposes.
-    func simulateBanner(
-        title: String = "Upcoming Vet Vaccination",
-        message: String = "Charlie's Rabies booster shot is due in 3 days. Book an appointment early!",
-        ctaLabel: String = "Book Appointment",
-        badgeTag: String = "Healthcare Alert"
-    ) {
-        activeCustomTemplate = CustomInAppUiModel(
-            templateName: "PetCare_Alert_Banner",
-            title: title,
-            message: message,
-            ctaLabel: ctaLabel,
-            badgeTag: badgeTag,
-            contextRef: nil
-        )
-        
-        LiveInspectorViewModel.shared.log(
-            title: "Custom In-App: Simulated Banner",
-            category: .cleverTap,
-            payload: [
-                "template": "PetCare_Alert_Banner",
-                "title": title,
-                "message": message,
-                "cta_label": ctaLabel,
-                "badge_tag": badgeTag
-            ]
-        )
-    }
-    
-    /// Simulates the haptic alert function.
-    func simulateHaptic() {
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-        
-        LiveInspectorViewModel.shared.log(
-            title: "Custom In-App: Simulated Haptic Alert",
-            category: .cleverTap,
-            payload: [
-                "function": "PetCare_Haptic_Alert",
-                "durationMs": 400
-            ]
-        )
     }
 }

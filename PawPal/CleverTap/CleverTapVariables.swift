@@ -35,6 +35,9 @@ class CleverTapVariables: ObservableObject {
     @Published var lastFetchStatus: String = "Not fetched yet"
     @Published var isSyncing: Bool = false
     @Published var isFetching: Bool = false
+    @Published var hasLiveServerOverrides: Bool = false
+    @Published var activeVariants: [[String: Any]] = []
+    @Published var probableCauseMessage: String = "Awaiting fetch from CleverTap Dashboard"
     
     private var isDefined: Bool = false
     
@@ -194,6 +197,26 @@ class CleverTapVariables: ObservableObject {
     
     /// Reads raw variable values from CleverTap and updates reactive properties.
     func refreshPublishedValues() {
+        if let variants = CleverTap.sharedInstance()?.variants() as? [[String: Any]] {
+            self.activeVariants = variants
+        }
+        
+        let changed = (welcomeBannerVar?.hasChanged() == true) ||
+                      (enableSpecialCareDiscountVar?.hasChanged() == true) ||
+                      (careDiscountPercentageVar?.hasChanged() == true) ||
+                      (featuredCategoryConfigVar?.hasChanged() == true) ||
+                      (!activeVariants.isEmpty)
+        
+        self.hasLiveServerOverrides = changed
+        
+        if changed {
+            self.probableCauseMessage = "Variables actively overridden by CleverTap Dashboard campaign."
+            CleverTapDiagnostics.shared.variablesDeliveryState = .liveReceived
+        } else {
+            self.probableCauseMessage = "No active A/B test or Variable Campaign overrides on Dashboard. Baseline schema maintained."
+            CleverTapDiagnostics.shared.variablesDeliveryState = .pending
+        }
+        
         if let text = welcomeBannerVar?.stringValue {
             self.welcomeBannerText = text
         }
