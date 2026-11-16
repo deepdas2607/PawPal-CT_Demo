@@ -200,6 +200,7 @@ struct DashboardView: View {
             .sheet(isPresented: $isCareStorePresented) {
                 CareStoreView()
             }
+            .recordScreenView("Dashboard Screen")
         }
     }
     

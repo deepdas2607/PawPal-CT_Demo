@@ -34,6 +34,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // 5. Register with Apple Push Notification Service (APNs)
         registerForPush()
         
+        // 6. Start CleverTap Geofence SDK Region Monitoring
+        CleverTapLocationManager.shared.startGeofencing(launchOptions: launchOptions)
+        
         return true
     }
     
@@ -179,6 +182,21 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             payload: customExtras ?? [:]
         )
     }
+    // MARK: - Deep Links & Universal Links
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: options[.sourceApplication] as? String)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "Universal Link / Deep Link Opened (AppDelegate)",
+            category: .cleverTap,
+            payload: [
+                "url": url.absoluteString,
+                "sourceApplication": (options[.sourceApplication] as? String) ?? "Direct"
+            ]
+        )
+        return true
+    }
 }
 
 @main
@@ -189,6 +207,14 @@ struct PawPalApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onOpenURL { url in
+                    CleverTap.sharedInstance()?.handleOpen(url, sourceApplication: nil)
+                    LiveInspectorViewModel.shared.log(
+                        title: "Universal Link / Deep Link Opened (SwiftUI)",
+                        category: .cleverTap,
+                        payload: ["url": url.absoluteString]
+                    )
+                }
         }
     }
 }

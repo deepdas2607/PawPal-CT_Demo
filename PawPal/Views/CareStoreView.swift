@@ -23,6 +23,7 @@ struct CareStoreView: View {
     @ObservedObject private var inboxManager = CleverTapInboxManager.shared
     @ObservedObject private var customTemplates = CleverTapCustomTemplates.shared
     @ObservedObject private var variables = CleverTapVariables.shared
+    @ObservedObject private var locationManager = CleverTapLocationManager.shared
     
     // Store items available for purchase
     struct StoreItem: Identifiable {
@@ -179,6 +180,7 @@ struct CareStoreView: View {
             } message: {
                 Text(statusAlertMessage)
             }
+            .recordScreenView("Care Store & Lab Screen")
         }
     }
     
@@ -945,15 +947,78 @@ struct CareStoreView: View {
             HStack {
                 Image(systemName: "location.circle.fill")
                     .foregroundColor(.blue)
-                Text("Geo-Location & Privacy Controls")
+                Text("Geo-Location, Geofencing & Privacy")
                     .font(.headline)
             }
             
-            Text("Simulate pet parent coordinates for CleverTap geo-targeting campaigns and test SDK privacy flags (GDPR opt-out, offline queuing).")
+            Text("Test CleverTap Geofence SDK region monitoring, location reporting, and privacy controls (GDPR opt-out, offline queuing, device network info).")
                 .font(.caption2)
                 .foregroundColor(.secondary)
             
-            // Geo-Location Buttons
+            // 1. Geofence SDK Region Monitoring Section
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("CleverTap Geofence Monitoring")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(locationManager.isGeofenceMonitoringActive ? "Active" : "Stopped")
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(locationManager.isGeofenceMonitoringActive ? Color.green.opacity(0.15) : Color.gray.opacity(0.15))
+                        .foregroundColor(locationManager.isGeofenceMonitoringActive ? .green : .gray)
+                        .cornerRadius(4)
+                }
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        locationManager.requestWhenInUsePermission()
+                    }) {
+                        Text("Req Location Perm")
+                            .font(.caption.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.blue.opacity(0.12))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
+                    }
+                    
+                    if locationManager.isGeofenceMonitoringActive {
+                        Button(action: {
+                            locationManager.stopGeofencing()
+                            statusAlertMessage = "Stopped CleverTap Geofence region monitoring."
+                            showStatusAlert = true
+                        }) {
+                            Text("Stop Geofence")
+                                .font(.caption.bold())
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                                .background(Color.red.opacity(0.12))
+                                .foregroundColor(.red)
+                                .cornerRadius(8)
+                        }
+                    } else {
+                        Button(action: {
+                            locationManager.startGeofencing()
+                            statusAlertMessage = "Started CleverTap Geofence region monitoring."
+                            showStatusAlert = true
+                        }) {
+                            Text("Start Geofence")
+                                .font(.caption.bold())
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                                .background(Color.green.opacity(0.12))
+                                .foregroundColor(.green)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+            }
+            
+            Divider()
+            
+            // 2. Geo-Location Simulator Buttons
             VStack(alignment: .leading, spacing: 6) {
                 Text("Simulate Location (CleverTap.setLocation)")
                     .font(.system(size: 11, weight: .bold))
@@ -961,8 +1026,7 @@ struct CareStoreView: View {
                 
                 HStack(spacing: 8) {
                     Button(action: {
-                        // San Francisco Coordinates
-                        CleverTapManager.shared.setLocation(latitude: 37.7749, longitude: -122.4194)
+                        locationManager.recordManualLocation(latitude: 37.7749, longitude: -122.4194, label: "San Francisco")
                         statusAlertMessage = "Set CleverTap Location to San Francisco, CA (37.7749, -122.4194)."
                         showStatusAlert = true
                     }) {
@@ -979,8 +1043,7 @@ struct CareStoreView: View {
                     }
                     
                     Button(action: {
-                        // New York Coordinates
-                        CleverTapManager.shared.setLocation(latitude: 40.7128, longitude: -74.0060)
+                        locationManager.recordManualLocation(latitude: 40.7128, longitude: -74.0060, label: "New York")
                         statusAlertMessage = "Set CleverTap Location to New York, NY (40.7128, -74.0060)."
                         showStatusAlert = true
                     }) {
@@ -1000,7 +1063,7 @@ struct CareStoreView: View {
             
             Divider()
             
-            // Privacy & Offline Toggles
+            // 3. Privacy, Offline & Network Toggles
             VStack(spacing: 10) {
                 Toggle(isOn: $isOptedOut) {
                     VStack(alignment: .leading, spacing: 2) {

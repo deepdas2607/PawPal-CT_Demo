@@ -3,6 +3,7 @@ use_frameworks!
 
 target 'PawPal' do
   pod 'CleverTap-iOS-SDK'
+  pod 'CleverTap-Geofence-SDK'
 end
 
 post_install do |installer|
