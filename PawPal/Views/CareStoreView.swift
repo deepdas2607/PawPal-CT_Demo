@@ -111,7 +111,13 @@ struct CareStoreView: View {
                         // 8. Communication Preferences (CleverTap DND & Channels)
                         communicationPrefsSection
                         
-                        // 9. User Profile Switcher (onUserLogin testing)
+                        // 9. User Profile Demographics & Multi-Values Lab
+                        userProfileAttributesLabSection
+                        
+                        // 10. Custom Events & Data Types Lab
+                        customEventsLabSection
+                        
+                        // 11. User Profile Switcher (onUserLogin testing)
                         userProfileSwitcherSection
                     }
                     .padding(.horizontal, 16)
@@ -544,6 +550,217 @@ struct CareStoreView: View {
                 .onChange(of: phoneDndEnabled) { _ in
                     syncCommunicationPreferences()
                 }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - User Profile Demographics & Multi-Values Lab
+    
+    private var userProfileAttributesLabSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "person.text.rectangle.fill")
+                    .foregroundColor(.indigo)
+                Text("User Profile & Multi-Value Lab")
+                    .font(.headline)
+            }
+            
+            Text("Enrich profile with Predefined fields (DOB, Gender), Multi-Value arrays (Allergies), and Counters.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            // 1. Predefined Demographics Button
+            Button(action: {
+                // Creates DOB: 1994-06-15 (NSDate/Date object)
+                var components = DateComponents()
+                components.year = 1994
+                components.month = 6
+                components.day = 15
+                let dob = Calendar.current.date(from: components) ?? Date()
+                
+                CleverTapProfile.pushRichDemographics(
+                    name: "Jack Montana",
+                    email: "jack.montana@pawpal.local",
+                    phone: "+14155551234",
+                    gender: "M",
+                    dateOfBirth: dob,
+                    photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
+                    education: "Graduate",
+                    married: "Y",
+                    customerType: "Gold VIP"
+                )
+                statusAlertMessage = "Pushed Predefined Demographics (Name, Email, Phone, Gender: M, DOB: 1994, Education: Graduate, Photo)."
+                showStatusAlert = true
+            }) {
+                HStack {
+                    Image(systemName: "person.crop.circle.badge.checkmark")
+                    Text("Push Predefined Demographics (DOB, Gender, Phone)")
+                    Spacer()
+                    Image(systemName: "arrow.up.circle.fill").font(.caption)
+                }
+                .font(.caption.bold())
+                .padding(10)
+                .frame(maxWidth: .infinity)
+                .background(Color.indigo.opacity(0.12))
+                .foregroundColor(.indigo)
+                .cornerRadius(8)
+            }
+            
+            // 2. Multi-Values Operations
+            VStack(spacing: 6) {
+                HStack(spacing: 8) {
+                    Button(action: {
+                        CleverTapProfile.setMultiValues(["Grain-Free", "Hypoallergenic", "Low-Fat"], forKey: "Dietary Needs")
+                        statusAlertMessage = "Set Multi-Values for 'Dietary Needs': [Grain-Free, Hypoallergenic, Low-Fat]."
+                        showStatusAlert = true
+                    }) {
+                        Text("Set Multi: Dietary Needs")
+                            .font(.system(size: 11, weight: .bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.blue.opacity(0.12))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
+                    }
+                    
+                    Button(action: {
+                        CleverTapProfile.addMultiValue("Raw-Diet", forKey: "Dietary Needs")
+                        statusAlertMessage = "Added Multi-Value 'Raw-Diet' to 'Dietary Needs'."
+                        showStatusAlert = true
+                    }) {
+                        Text("+ Add 'Raw-Diet'")
+                            .font(.system(size: 11, weight: .bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.green.opacity(0.12))
+                            .foregroundColor(.green)
+                            .cornerRadius(8)
+                    }
+                }
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        CleverTapProfile.removeMultiValue("Low-Fat", forKey: "Dietary Needs")
+                        statusAlertMessage = "Removed Multi-Value 'Low-Fat' from 'Dietary Needs'."
+                        showStatusAlert = true
+                    }) {
+                        Text("- Remove 'Low-Fat'")
+                            .font(.system(size: 11, weight: .bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.orange.opacity(0.12))
+                            .foregroundColor(.orange)
+                            .cornerRadius(8)
+                    }
+                    
+                    Button(action: {
+                        CleverTapProfile.removeValueForKey("Dietary Needs")
+                        statusAlertMessage = "Removed entire profile key 'Dietary Needs'."
+                        showStatusAlert = true
+                    }) {
+                        Text("Clear Key")
+                            .font(.system(size: 11, weight: .bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.red.opacity(0.12))
+                            .foregroundColor(.red)
+                            .cornerRadius(8)
+                    }
+                }
+            }
+            
+            // 3. Increment & Decrement Counters
+            HStack(spacing: 8) {
+                Button(action: {
+                    CleverTapProfile.incrementProfileValue(key: "Care Score", by: 15)
+                    statusAlertMessage = "Incremented 'Care Score' by +15 on user profile."
+                    showStatusAlert = true
+                }) {
+                    Text("Score +15")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.green.opacity(0.15))
+                        .foregroundColor(.green)
+                        .cornerRadius(8)
+                }
+                
+                Button(action: {
+                    CleverTapProfile.decrementProfileValue(key: "Care Score", by: 5)
+                    statusAlertMessage = "Decremented 'Care Score' by -5 on user profile."
+                    showStatusAlert = true
+                }) {
+                    Text("Score -5")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Color.pink.opacity(0.15))
+                        .foregroundColor(.pink)
+                        .cornerRadius(8)
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.cardBackground)
+        .cornerRadius(12)
+    }
+    
+    // MARK: - Custom Events & Data Types Lab
+    
+    private var customEventsLabSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "bolt.badge.clock.fill")
+                    .foregroundColor(.cyan)
+                Text("Custom Events & Property Types Lab")
+                    .font(.headline)
+            }
+            
+            Text("Track events with String, Number, Boolean, and NSDate property types.")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            HStack(spacing: 8) {
+                // Simple event without properties
+                Button(action: {
+                    CleverTapEvents.logEvent("Care Feature Explored")
+                    statusAlertMessage = "Dispatched simple event: 'Care Feature Explored' (no properties)."
+                    showStatusAlert = true
+                }) {
+                    Text("Simple Event")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.cyan.opacity(0.15))
+                        .foregroundColor(.cyan)
+                        .cornerRadius(8)
+                }
+                
+                // Rich event with full property types
+                Button(action: {
+                    let eventProps: [String: Any] = [
+                        "Feature Name": "Pet Wellness Scan",
+                        "Completion Percentage": 100,
+                        "Health Score": 96.5,
+                        "Is Recommended Vaccinated": true,
+                        "Next Appointment Date": Date().addingTimeInterval(86400 * 7), // NSDate 7 days ahead
+                        "Tags": "wellness, routine, vet-verified"
+                    ]
+                    CleverTapEvents.logEvent("Wellness Assessment Completed", properties: eventProps)
+                    statusAlertMessage = "Dispatched rich event: 'Wellness Assessment Completed' with String, Int, Double, Bool, and NSDate."
+                    showStatusAlert = true
+                }) {
+                    Text("Rich Event (Props)")
+                        .font(.caption.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.teal.opacity(0.15))
+                        .foregroundColor(.teal)
+                        .cornerRadius(8)
+                }
+            }
         }
         .padding(14)
         .background(Color.cardBackground)

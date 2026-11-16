@@ -101,4 +101,142 @@ struct CleverTapProfile {
     static func incrementLifetimeSpend(amount: Double) {
         incrementProfileValue(key: "Lifetime Spend", by: Int(amount))
     }
+    
+    // MARK: - Multi-Value Profile Attributes (Arbitrary Multi-Value API)
+    
+    /// Sets a multi-value string property on the user profile (e.g., Allergies, Dietary Needs).
+    static func setMultiValues(_ values: [String], forKey key: String) {
+        guard CleverTapConfig.isAnalyticsConsentGiven else { return }
+        
+        CleverTap.sharedInstance()?.profileSetMultiValues(values, forKey: key)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: profileSetMultiValues (\(key))",
+            category: .cleverTap,
+            payload: [
+                "key": key,
+                "values": values
+            ]
+        )
+    }
+    
+    /// Adds a single value to an existing multi-value profile property.
+    static func addMultiValue(_ value: String, forKey key: String) {
+        guard CleverTapConfig.isAnalyticsConsentGiven else { return }
+        
+        CleverTap.sharedInstance()?.profileAddMultiValue(value, forKey: key)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: profileAddMultiValue (+\(value))",
+            category: .cleverTap,
+            payload: [
+                "key": key,
+                "addedValue": value
+            ]
+        )
+    }
+    
+    /// Adds multiple values to an existing multi-value profile property.
+    static func addMultiValues(_ values: [String], forKey key: String) {
+        guard CleverTapConfig.isAnalyticsConsentGiven else { return }
+        
+        CleverTap.sharedInstance()?.profileAddMultiValues(values, forKey: key)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: profileAddMultiValues (\(key))",
+            category: .cleverTap,
+            payload: [
+                "key": key,
+                "addedValues": values
+            ]
+        )
+    }
+    
+    /// Removes a single value from a multi-value profile property.
+    static func removeMultiValue(_ value: String, forKey key: String) {
+        guard CleverTapConfig.isAnalyticsConsentGiven else { return }
+        
+        CleverTap.sharedInstance()?.profileRemoveMultiValue(value, forKey: key)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: profileRemoveMultiValue (-\(value))",
+            category: .cleverTap,
+            payload: [
+                "key": key,
+                "removedValue": value
+            ]
+        )
+    }
+    
+    /// Removes multiple values from a multi-value profile property.
+    static func removeMultiValues(_ values: [String], forKey key: String) {
+        guard CleverTapConfig.isAnalyticsConsentGiven else { return }
+        
+        CleverTap.sharedInstance()?.profileRemoveMultiValues(values, forKey: key)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: profileRemoveMultiValues (\(key))",
+            category: .cleverTap,
+            payload: [
+                "key": key,
+                "removedValues": values
+            ]
+        )
+    }
+    
+    /// Completely removes a profile property (scalar or multi-value) from the profile.
+    static func removeValueForKey(_ key: String) {
+        guard CleverTapConfig.isAnalyticsConsentGiven else { return }
+        
+        CleverTap.sharedInstance()?.profileRemoveValue(forKey: key)
+        
+        LiveInspectorViewModel.shared.log(
+            title: "CleverTap: profileRemoveValue(forKey: \"\(key)\")",
+            category: .cleverTap,
+            payload: [
+                "removedKey": key
+            ]
+        )
+    }
+    
+    // MARK: - Rich Predefined Demographics
+    
+    /// Pushes comprehensive standard predefined CleverTap demographic profile properties.
+    static func pushRichDemographics(
+        name: String,
+        email: String,
+        phone: String,
+        gender: String,
+        dateOfBirth: Date,
+        photoUrl: String? = nil,
+        education: String? = "Graduate",
+        married: String? = "Y",
+        customerType: String = "Premium"
+    ) {
+        var profile: [String: Any] = [
+            "Name": name,
+            "Email": email,
+            "Phone": phone,
+            "Gender": gender, // "M" or "F"
+            "DOB": dateOfBirth, // NSDate object for automatic Age calculation
+            "Customer Type": customerType,
+            "MSG-push": true,
+            "MSG-email": true,
+            "MSG-sms": false,
+            "MSG-dndPhone": false,
+            "MSG-dndEmail": false
+        ]
+        
+        if let photo = photoUrl, !photo.isEmpty {
+            profile["Photo"] = photo
+        }
+        if let edu = education {
+            profile["Education"] = edu
+        }
+        if let mar = married {
+            profile["Married"] = mar
+        }
+        
+        pushProfile(properties: profile)
+    }
 }
